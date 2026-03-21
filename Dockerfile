@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir build && python -m build
 FROM python:3.12-slim
 
 LABEL maintainer="ssan" \
-      org.opencontainers.image.source="https://github.com/ssan/k8s-health-checker" \
+      org.opencontainers.image.source="https://github.com/SanjaySundarMurthy/k8s-health-checker" \
       org.opencontainers.image.description="k8s-health-checker - DevOps CLI Tool"
 
 RUN groupadd -r appuser && useradd -r -g appuser appuser
