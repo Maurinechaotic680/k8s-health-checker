@@ -177,7 +177,6 @@ class SecurityChecker(BaseChecker):
             if ns in ("kube-system", "kube-public", "kube-node-lease"):
                 continue
 
-            pod_name = pod.metadata.name
             sa = pod.spec.service_account_name or "default"
 
             if sa == "default":

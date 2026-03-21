@@ -62,7 +62,8 @@ def _print_issues(report: HealthReport, severity: Severity) -> None:
         Severity.INFO: "blue",
     }[severity]
 
-    title = f"{severity.icon}  {severity.label} ({len(items)} issue{'s' if len(items) != 1 else ''})"
+    count = len(items)
+    title = f"{severity.icon}  {severity.label} ({count} issue{'s' if count != 1 else ''})"
 
     table = Table(
         show_header=True,
@@ -184,7 +185,8 @@ def _print_score(report: HealthReport) -> None:
     summary = report.summary
     cluster_text = (
         f"   Nodes: {summary.node_count}  │  "
-        f"Pods: {summary.pod_running} running, {summary.pod_pending} pending, {summary.pod_failed} failed  │  "
+        f"Pods: {summary.pod_running} running, {summary.pod_pending} pending, "
+        f"{summary.pod_failed} failed  │  "
         f"Deployments: {summary.deployment_count}  │  "
         f"Namespaces: {summary.namespace_count}"
     )

@@ -75,7 +75,7 @@ class NodeChecker(BaseChecker):
                         category=Category.NODES,
                         resource=name,
                         fix="Investigate top memory consumers: "
-                        f"kubectl top pods --sort-by=memory",
+                        "kubectl top pods --sort-by=memory",
                     )
                 )
 

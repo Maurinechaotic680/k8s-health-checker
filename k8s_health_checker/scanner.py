@@ -18,7 +18,6 @@ from k8s_health_checker.checks.security import SecurityChecker
 from k8s_health_checker.checks.workloads import WorkloadChecker
 from k8s_health_checker.models import Category, ClusterSummary, HealthReport
 
-
 ALL_CHECKERS = [
     PodChecker,
     NodeChecker,

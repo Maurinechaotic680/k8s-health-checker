@@ -25,7 +25,10 @@ class WorkloadChecker(BaseChecker):
                 CheckResult(
                     name="All workloads healthy",
                     severity=Severity.PASS,
-                    message="All Deployments, StatefulSets, and DaemonSets are running as expected.",
+                    message=(
+                        "All Deployments, StatefulSets, and DaemonSets "
+                        "are running as expected."
+                    ),
                     category=Category.WORKLOADS,
                 )
             )

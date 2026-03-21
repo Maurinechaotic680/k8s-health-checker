@@ -41,7 +41,10 @@ def make_pod(
         container.resources.requests = {"cpu": "100m", "memory": "128Mi"}
     else:
         container.resources.requests = None
-        container.resources = MagicMock(requests=None, limits=None if not has_limits else {"cpu": "500m"})
+        container.resources = MagicMock(
+            requests=None,
+            limits=None if not has_limits else {"cpu": "500m"},
+        )
 
     if has_limits:
         container.resources.limits = {"cpu": "500m", "memory": "256Mi"}
@@ -99,7 +102,11 @@ def make_node(
         _make_condition("DiskPressure", "True" if disk_pressure else "False", "NoDiskPressure")
     )
     conditions.append(
-        _make_condition("MemoryPressure", "True" if memory_pressure else "False", "NoMemoryPressure")
+        _make_condition(
+            "MemoryPressure",
+            "True" if memory_pressure else "False",
+            "NoMemoryPressure",
+        )
     )
     conditions.append(
         _make_condition("PIDPressure", "True" if pid_pressure else "False", "NoPIDPressure")

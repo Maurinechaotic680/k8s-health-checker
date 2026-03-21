@@ -31,9 +31,15 @@ class AutoscalingChecker(BaseChecker):
                 CheckResult(
                     name="No HPAs configured",
                     severity=Severity.INFO,
-                    message="No HorizontalPodAutoscalers found. Consider adding autoscaling for production workloads.",
+                    message=(
+                        "No HorizontalPodAutoscalers found. "
+                        "Consider adding autoscaling for production workloads."
+                    ),
                     category=Category.AUTOSCALING,
-                    fix="Create an HPA: kubectl autoscale deployment <name> --min=2 --max=10 --cpu-percent=70",
+                    fix=(
+                        "Create an HPA: kubectl autoscale deployment <name> "
+                        "--min=2 --max=10 --cpu-percent=70"
+                    ),
                 )
             )
             return results
