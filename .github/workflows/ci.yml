@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -37,12 +41,16 @@ jobs:
           k8s-health --version
           k8s-health scan --demo
           k8s-health scan --demo -o json
+          k8s-health scan --demo -v
           k8s-health score --demo
 
   publish:
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -54,15 +62,17 @@ jobs:
       - name: Install build tools
         run: |
           python -m pip install --upgrade pip
-          pip install build
+          pip install build twine
 
       - name: Build package
         run: python -m build
+
+      - name: Check package
+        run: twine check dist/*
 
       - name: Publish to PyPI
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: |
-          pip install twine
-          twine upload dist/* --skip-existing
+        run: twine upload dist/* --skip-existing
+        continue-on-error: true

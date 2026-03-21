@@ -73,11 +73,19 @@ def cli() -> None:
     default=False,
     help="Run with demo data (no cluster needed).",
 )
+@click.option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    default=False,
+    help="Show detailed output including passed checks and fix suggestions.",
+)
 def scan(
     namespace: str | None,
     categories: tuple[str, ...],
     output_format: str,
     demo: bool,
+    verbose: bool,
 ) -> None:
     """Run a full health scan on your Kubernetes cluster.
 
@@ -89,9 +97,10 @@ def scan(
       k8s-health scan -c pods -c nodes         Scan specific categories
       k8s-health scan -o json                  JSON output
       k8s-health scan -o json > report.json    Save JSON to file
+      k8s-health scan -v                       Verbose output
     """
     if demo:
-        report = _run_demo()
+        report = _run_demo(quiet=output_format == "json")
     else:
         report = _run_live_scan(namespace, categories)
 
@@ -103,7 +112,7 @@ def scan(
     else:
         from k8s_health_checker.output.console import print_report
 
-        print_report(report)
+        print_report(report, verbose=verbose)
 
 
 # ------------------------------------------------------------------
@@ -146,11 +155,12 @@ def score(demo: bool, namespace: str | None) -> None:
 # ------------------------------------------------------------------
 
 
-def _run_demo():
+def _run_demo(quiet: bool = False):
     """Run in demo mode with synthetic data."""
     from k8s_health_checker.demo import generate_demo_report
 
-    console.print("\n[dim]  ℹ️  Running in demo mode (no cluster connection)[/dim]")
+    if not quiet:
+        console.print("\n[dim]  ℹ️  Running in demo mode (no cluster connection)[/dim]")
     return generate_demo_report()
 
 

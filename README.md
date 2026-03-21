@@ -27,12 +27,13 @@ $ k8s-health scan
 | 🖥️ **Node Health** | NotReady, DiskPressure, MemoryPressure, PIDPressure, cordoned |
 | 📊 **Resource Limits** | Missing CPU/memory requests and limits |
 | 🩺 **Health Probes** | Missing readiness and liveness probes |
-| 🔒 **Security** | NetworkPolicies, privileged containers, service accounts |
+| 🔒 **Security** | NetworkPolicies, privileged containers, root UID, service accounts |
 | ⚙️ **Workloads** | Deployment/StatefulSet/DaemonSet replicas, stuck rollouts |
-| 📈 **Autoscaling** | HPA at max, min=max (disabled autoscaling) |
+| 📈 **Autoscaling** | HPA at max, min=max (disabled autoscaling), no HPAs |
 | 🎯 **Health Score** | 0-100 score with letter grade (A-F) |
 | 🎨 **Beautiful Output** | Rich terminal tables with colors and icons |
 | 📄 **JSON Export** | Pipe results to other tools or dashboards |
+| 🔍 **Verbose Mode** | Show detailed fix suggestions with `-v` |
 | 🎮 **Demo Mode** | Try instantly — no cluster needed |
 
 ---
@@ -50,7 +51,7 @@ Or install from source:
 ```bash
 git clone https://github.com/SanjaySundarMurthy/k8s-health-checker.git
 cd k8s-health-checker
-pip install k8s-health-checker
+pip install -e ".[dev]"
 ```
 
 ### Try It (No Cluster Needed)
@@ -77,6 +78,9 @@ k8s-health scan -c pods -c nodes
 k8s-health scan -o json
 k8s-health scan -o json > report.json
 
+# Verbose output with fix suggestions
+k8s-health scan -v
+
 # Just the health score
 k8s-health score
 ```
@@ -95,9 +99,9 @@ For demo mode, only Python is needed — no cluster, no kubectl, no credentials.
 
 ---
 
-## 🔍 What It Checks
+## 🔍 What It Checks (27 Rules)
 
-### 🫛 Pods
+### 🫛 Pods (6 rules)
 - **CrashLoopBackOff** — containers crash-looping (CRITICAL)
 - **OOMKilled** — containers killed by OOM killer (CRITICAL)
 - **Failed state** — pods in Failed phase (CRITICAL)
@@ -105,35 +109,35 @@ For demo mode, only Python is needed — no cluster, no kubectl, no credentials.
 - **Elevated restarts** — containers with 5+ restarts (WARNING)
 - **Pending** — pods stuck in Pending phase (WARNING)
 
-### 🖥️ Nodes
+### 🖥️ Nodes (5 rules)
 - **NotReady** — nodes not accepting workloads (CRITICAL)
 - **DiskPressure** — nodes running out of disk (CRITICAL)
 - **MemoryPressure** — nodes running out of memory (CRITICAL)
 - **PIDPressure** — too many processes on node (WARNING)
 - **Cordoned** — nodes marked unschedulable (INFO)
 
-### 📊 Resources
+### 📊 Resources (2 rules)
 - **Missing requests** — containers without CPU/memory requests (WARNING)
 - **Missing limits** — containers without CPU/memory limits (WARNING)
 
-### 🩺 Probes
+### 🩺 Probes (2 rules)
 - **Missing readiness probe** — traffic may hit unready containers (WARNING)
 - **Missing liveness probe** — hung containers won't restart (INFO)
 
-### 🔒 Security
+### 🔒 Security (4 rules)
 - **Privileged containers** — full host access (CRITICAL)
 - **Running as root** — UID 0 containers (WARNING)
 - **No NetworkPolicies** — unrestricted pod communication (WARNING)
 - **Default ServiceAccount** — pods using default SA (INFO)
 
-### ⚙️ Workloads
+### ⚙️ Workloads (5 rules)
 - **No ready replicas** — deployment completely down (CRITICAL)
 - **Partial readiness** — not all replicas ready (WARNING)
 - **Stuck rollout** — rollout not progressing (WARNING)
 - **Single replica** — no high availability (INFO)
 - **Scaled to zero** — intentionally or accidentally (INFO)
 
-### 📈 Autoscaling
+### 📈 Autoscaling (3 rules)
 - **HPA at max** — autoscaler can't add more replicas (WARNING)
 - **HPA min = max** — autoscaling effectively disabled (INFO)
 - **No HPAs** — no autoscaling configured (INFO)
@@ -186,6 +190,7 @@ Options:
                               Run only specific categories (repeatable).
   -o, --output [terminal|json]
                               Output format (default: terminal).
+  -v, --verbose               Show detailed output with fix suggestions.
   --demo                      Run with demo data (no cluster needed).
   --help                      Show this message and exit.
 ```
@@ -201,6 +206,73 @@ Options:
 
 ---
 
+## 🏗️ Project Structure
+
+```
+k8s-health-checker/
+├── k8s_health_checker/
+│   ├── __init__.py          # Package metadata and version
+│   ├── cli.py               # Click CLI entry point (scan, score)
+│   ├── scanner.py           # Main scanner orchestrator
+│   ├── models.py            # Data models (CheckResult, HealthReport, Severity)
+│   ├── demo.py              # Demo mode data generator
+│   ├── checks/
+│   │   ├── base.py          # BaseChecker abstract class
+│   │   ├── pods.py          # Pod health checks (6 rules)
+│   │   ├── nodes.py         # Node health checks (5 rules)
+│   │   ├── resources.py     # Resource limits checks (2 rules)
+│   │   ├── probes.py        # Health probe checks (2 rules)
+│   │   ├── security.py      # Security checks (4 rules)
+│   │   ├── workloads.py     # Workload checks (5 rules)
+│   │   └── autoscaling.py   # HPA checks (3 rules)
+│   └── output/
+│       ├── console.py       # Rich terminal renderer
+│       └── json_out.py      # JSON output formatter
+├── tests/
+│   ├── conftest.py          # Test fixtures and mock builders
+│   └── test_checks.py       # 53 tests covering all checkers
+├── .github/
+│   └── workflows/
+│       └── ci.yml           # CI pipeline (test + lint + publish)
+├── Dockerfile               # Multi-stage Docker build
+├── pyproject.toml           # Project config (hatchling)
+├── CONTRIBUTING.md          # Contributor guide
+├── LICENSE                  # MIT License
+└── README.md
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run all 53 tests
+pytest
+
+# With coverage
+pytest --cov=k8s_health_checker --cov-report=term-missing
+
+# Run specific test class
+pytest tests/test_checks.py::TestPodChecker -v
+
+# Run linter
+ruff check .
+```
+
+Test coverage includes:
+- **Pod checks** — healthy, crash loop, pending, failed, OOMKilled, restart thresholds, namespace-scoped
+- **Node checks** — ready, NotReady, DiskPressure, MemoryPressure, PIDPressure, cordoned, multi-condition
+- **Resource checks** — all defined, missing requests, missing limits, missing both
+- **Probe checks** — all present, missing readiness, missing liveness, missing both
+- **Security checks** — privileged containers, root containers, no NetworkPolicies
+- **Workload checks** — healthy, unhealthy, partial readiness, single replica, scaled to zero
+- **Autoscaling checks** — at max, healthy, min=max, no HPAs
+- **CLI tests** — version, help, demo scan (terminal + JSON + verbose), score
+- **JSON output** — structure validation, field completeness
+- **Model edge cases** — score clamping, grade boundaries, severity/category properties, filtering
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
@@ -209,7 +281,7 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 # Clone and set up dev environment
 git clone https://github.com/SanjaySundarMurthy/k8s-health-checker.git
 cd k8s-health-checker
-pip install k8s-health-checker
+pip install -e ".[dev]"
 
 # Run tests
 pytest
@@ -247,16 +319,19 @@ Run without installing Python:
 # Build the image
 docker build -t k8s-health-checker .
 
-# Run
-docker run --rm k8s-health-checker --help
+# Run demo mode
+docker run --rm k8s-health-checker scan --demo
 
-# Example with volume mount
-docker run --rm -v ${PWD}:/workspace k8s-health-checker [command] /workspace
+# Run with kubeconfig mount
+docker run --rm -v ~/.kube:/home/appuser/.kube:ro k8s-health-checker scan
+
+# JSON output
+docker run --rm k8s-health-checker scan --demo -o json
 ```
 
 Or pull from the container registry:
 
 ```bash
-docker pull ghcr.io/SanjaySundarMurthy/k8s-health-checker:latest
-docker run --rm ghcr.io/SanjaySundarMurthy/k8s-health-checker:latest --help
+docker pull ghcr.io/sanjaysundarmurthy/k8s-health-checker:latest
+docker run --rm ghcr.io/sanjaysundarmurthy/k8s-health-checker:latest scan --demo
 ```

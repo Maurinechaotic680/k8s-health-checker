@@ -12,12 +12,12 @@ from k8s_health_checker.models import Category, HealthReport, Severity
 console = Console()
 
 
-def print_report(report: HealthReport) -> None:
+def print_report(report: HealthReport, verbose: bool = False) -> None:
     """Render the full health report to the terminal with Rich."""
     _print_header(report)
-    _print_issues(report, Severity.CRITICAL)
-    _print_issues(report, Severity.WARNING)
-    _print_issues(report, Severity.INFO)
+    _print_issues(report, Severity.CRITICAL, verbose=verbose)
+    _print_issues(report, Severity.WARNING, verbose=verbose)
+    _print_issues(report, Severity.INFO, verbose=verbose)
     _print_passed(report)
     _print_summary_table(report)
     _print_score(report)
@@ -51,7 +51,7 @@ def _print_header(report: HealthReport) -> None:
 # ------------------------------------------------------------------
 
 
-def _print_issues(report: HealthReport, severity: Severity) -> None:
+def _print_issues(report: HealthReport, severity: Severity, verbose: bool = False) -> None:
     items = [r for r in report.results if r.severity == severity]
     if not items:
         return
@@ -82,7 +82,7 @@ def _print_issues(report: HealthReport, severity: Severity) -> None:
 
     for i, result in enumerate(items, 1):
         detail = result.message
-        if result.fix:
+        if verbose and result.fix:
             detail += f"\n[dim]Fix: {result.fix}[/dim]"
         table.add_row(
             str(i),

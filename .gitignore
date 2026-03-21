@@ -29,6 +29,9 @@ Thumbs.db
 .coverage
 htmlcov/
 
+# Linting
+.ruff_cache/
+
 # Reports
 *.html
 !k8s_health_checker/templates/*.html

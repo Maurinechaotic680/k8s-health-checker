@@ -152,8 +152,8 @@ class HealthReport:
         """Calculate health score from 0-100.
 
         Starts at 100, deducts points per issue:
-          CRITICAL = -15 points
-          WARNING  = -5 points
+          CRITICAL = -8 points
+          WARNING  = -3 points
           INFO     = -1 point
         Minimum score is 0.
         """
