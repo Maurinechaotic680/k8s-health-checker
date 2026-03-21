@@ -1,6 +1,7 @@
-# 🏥 k8s-health-checker
+﻿# 🏥 k8s-health-checker
 
 [![PyPI](https://img.shields.io/pypi/v/k8s-health-checker.svg)](https://pypi.org/project/k8s-health-checker/)
+[![Python](https://img.shields.io/pypi/pyversions/k8s-health-checker)](https://pypi.org/project/k8s-health-checker/)
 [![CI](https://github.com/SanjaySundarMurthy/k8s-health-checker/actions/workflows/ci.yml/badge.svg)](https://github.com/SanjaySundarMurthy/k8s-health-checker/actions/workflows/ci.yml)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -49,7 +50,7 @@ Or install from source:
 ```bash
 git clone https://github.com/SanjaySundarMurthy/k8s-health-checker.git
 cd k8s-health-checker
-pip install -e .
+pip install k8s-health-checker
 ```
 
 ### Try It (No Cluster Needed)
@@ -208,7 +209,7 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 # Clone and set up dev environment
 git clone https://github.com/SanjaySundarMurthy/k8s-health-checker.git
 cd k8s-health-checker
-pip install -e ".[dev]"
+pip install k8s-health-checker
 
 # Run tests
 pytest
@@ -236,3 +237,26 @@ MIT License — see [LICENSE](LICENSE) for details.
 ---
 
 ⭐ **If this tool helps you, give it a star on GitHub!**
+
+
+## 🐳 Docker
+
+Run without installing Python:
+
+```bash
+# Build the image
+docker build -t k8s-health-checker .
+
+# Run
+docker run --rm k8s-health-checker --help
+
+# Example with volume mount
+docker run --rm -v ${PWD}:/workspace k8s-health-checker [command] /workspace
+```
+
+Or pull from the container registry:
+
+```bash
+docker pull ghcr.io/SanjaySundarMurthy/k8s-health-checker:latest
+docker run --rm ghcr.io/SanjaySundarMurthy/k8s-health-checker:latest --help
+```
