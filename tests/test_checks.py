@@ -20,7 +20,6 @@ from tests.conftest import (
     make_pod,
 )
 
-
 # =====================================================================
 # Pod Checks
 # =====================================================================
@@ -243,7 +242,8 @@ class TestAutoscalingChecker:
     def test_hpa_at_max(self):
         hpa = make_hpa(max_replicas=10, current_replicas=10)
         clients = make_k8s_clients()
-        clients["autoscaling_v1"].list_horizontal_pod_autoscaler_for_all_namespaces.return_value.items = [hpa]
+        autoscaling = clients["autoscaling_v1"]
+        autoscaling.list_horizontal_pod_autoscaler_for_all_namespaces.return_value.items = [hpa]
 
         results = AutoscalingChecker(clients).run()
         warnings = [r for r in results if r.severity == Severity.WARNING]
@@ -252,7 +252,8 @@ class TestAutoscalingChecker:
     def test_hpa_healthy(self):
         hpa = make_hpa(max_replicas=10, current_replicas=5)
         clients = make_k8s_clients()
-        clients["autoscaling_v1"].list_horizontal_pod_autoscaler_for_all_namespaces.return_value.items = [hpa]
+        autoscaling = clients["autoscaling_v1"]
+        autoscaling.list_horizontal_pod_autoscaler_for_all_namespaces.return_value.items = [hpa]
 
         results = AutoscalingChecker(clients).run()
         assert any(r.severity == Severity.PASS for r in results)
